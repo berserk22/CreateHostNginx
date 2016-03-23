@@ -1,0 +1,54 @@
+server {
+	listen 80;
+	server_name www.%host %host;
+	
+	##LOGS
+	access_log off;
+	error_log /srv/www/%webuser/logs/www.%host.error_log;
+	
+	##Document Root
+	root /srv/www/%webuser/html/%host/public;
+	
+	##Default Index
+	index index.php index.html index.htm;
+	
+	##Security 
+	if ( $request_method !~ ^(GET|HEAD|POST)$ ){
+	       return 444;
+	}
+
+	location / {
+                try_files $uri $uri/ /index.php?$query_string;
+        }
+
+        # Block access to .htaccess
+        location ~ \.htaccess {
+           deny all;
+        }
+	
+	location ~\.php$ {
+		   try_files $uri = 404;
+           fastcgi_pass   unix:/var/run/%webuser.sock;
+           fastcgi_index  index.php;
+           fastcgi_param  SCRIPT_FILENAME $document_root$fastcgi_script_name;
+           fastcgi_param TMP /srv/www/%webuser/tmp;
+           fastcgi_param TMPDIR  /srv/www/%webuser/tmp;
+           fastcgi_param TEMP  /srv/www/%webuser/tmp;
+           include fastcgi_params;
+       }
+    location = /favicon.ico {
+	 log_not_found off;
+	 access_log off;
+	 }
+
+	location = /robots.txt {
+	 allow all;
+	 log_not_found off;
+	 access_log off;
+	 }
+    location ~* ^.+.(jpe?g|gif|png|ico|css|zip|tgz|gz|rar|bz2|doc|xls|exe|pdf|ppt|txt|tar|mid|mi​di|wav|bmp|rtf|js|swf|avi|mp3)$ {
+           expires 31d;
+           add_header Pragma "public";
+           add_header Cache-Control "public, must-revalidate, proxy-revalidate";      
+       }
+}

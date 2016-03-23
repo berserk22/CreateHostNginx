@@ -1,0 +1,29 @@
+[%webuser]
+
+listen = /var/run/%webuser.sock
+
+listen.owner = %webuser
+listen.group = %webuser
+listen.mode = 0660
+
+user = %webuser
+group = %webuser
+
+pm = dynamic
+
+pm.max_children = 50
+pm.start_servers = 5
+pm.min_spare_servers = 5
+pm.max_spare_servers = 15
+pm.max_requests = 500
+
+env[TMP] = /srv/www/%webuser/tmp
+env[TMPDIR] = /srv/www/%webuser/tmp
+env[TEMP] = /srv/www/%webuser/tmp
+php_admin_value[error_log]= /srv/www/%webuser/logs/fpm-php.error.log
+php_admin_value[session.save_path] = /srv/www/%webuser/sessions
+php_admin_value[memory_limit] = 128M
+php_flag[display_errors] = off
+php_admin_flag[log_errors] = off
+
+chdir = /
